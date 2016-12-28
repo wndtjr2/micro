@@ -38,7 +38,7 @@ public class ebay {
 
     private Logger log = LoggerFactory.getLogger(ebay.class);
 
-    public MongoOperations mongoOperations = new MongoTemplate(new Mongo(), "test");
+    public MongoOperations mongoOperations = new MongoTemplate(new Mongo(), "db_order");
 
     @Autowired
     public MbrSvc mbrSvc;
@@ -93,8 +93,6 @@ public class ebay {
 
         String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+xstream.toXML(ebay);
 
-        System.out.println("XML!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"+xml);
-
         // Send post request
         con.setDoOutput(true);
         DataOutputStream wr = new DataOutputStream(con.getOutputStream());
@@ -103,9 +101,6 @@ public class ebay {
         wr.close();
 
         int responseCode = con.getResponseCode();
-        //System.out.println("\nSending 'POST' request to URL : " + sandBoxUrl);
-        //System.out.println("Post parameters : " + xml);
-        System.out.println("Response Code : " + responseCode);
 
         if(responseCode == 200){
             BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
@@ -126,23 +121,21 @@ public class ebay {
                     JSONObject xmlJsonObj = XML.toJSONObject(result);
 
                     Map<String, Object> json = xmlJsonObj.toMap();
-                    log.info("xml to map JSON = "+json);
 
                     Map<String, Object> getOrdersResponse =
                             (Map<String, Object>) json.get("GetOrdersResponse");
-                    log.info("map.get getOrdersResponse = "+getOrdersResponse);
-                    log.info("key = "+getOrdersResponse.keySet());
 
                     Map<String, Object> orderArray =
                             (Map<String, Object>) getOrdersResponse.get("OrderArray");
-                    log.info("map.get orderArray = "+orderArray);
 
                     List<Map<String, Object>> orders = (List<Map<String, Object>>) orderArray.get("Order");
                     for (Map<String, Object> order : orders){
-                        log.info("order = "+order);
-                        log.info("orderid = "+order.get("OrderID"));
-                        order.put("_id", order.get("ExtendedOrderID"));
-                        log.info("order list:"+order);
+                        Map<String, Object> extTrans = (Map<String, Object>) order.get("ExternalTransaction");
+                        StringBuilder stringBuilder = new StringBuilder();
+                        stringBuilder.append(order.get("OrderID"));
+                        stringBuilder.append("-");
+                        stringBuilder.append(extTrans.get("ExternalTransactionID"));
+                        order.put("_id", stringBuilder.toString());
                         mongoOperations.save(order,"eBay");
 
                         //vo += order.toString()+"\n\n\n\n";
