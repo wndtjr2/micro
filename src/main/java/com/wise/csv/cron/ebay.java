@@ -32,7 +32,7 @@ import java.util.Map;
  * Author : wisecommerce@bluewisesoft.com
  * Description : write class description here
  */
-@PropertySource(value="classpath:application.properties")
+@PropertySource(value = "classpath:application.properties")
 @Service
 public class ebay {
 
@@ -45,8 +45,8 @@ public class ebay {
 
     private static Environment environment;
 
-    @Scheduled(cron="*/5 * * * * *")
-    public void apiRequest() throws Exception{
+    //TODO remove comment @Scheduled(cron = "*/5 * * * * *")
+    public void apiRequest() throws Exception {
 
         System.out.println("\nTesting 2 - Send Http POST request");
         this.sendPost();
@@ -57,11 +57,11 @@ public class ebay {
     private void sendPost() throws Exception {
 
         String mbrNo = "1019";
+        String mbrSto = "123123";
         String token = "AgAAAA**AQAAAA**aAAAAA**madgWA**nY+sHZ2PrBmdj6wVnY+sEZ2PrA2dj6wFk4GiCZSGogmdj6x9nY+seQ**7gUEAA**AAMAAA**KeRo8h5GEHLuGXnBmIGJDxMr3vH3tyftNTAFPdleYmSPWJhtFyVSQ2vvX8uUGXtkR40QwXuIZTAc9BMrN4mYR4kkVnKTrlqSqRFvN228s9lteZNAhDtDTzBCbwVhoDLnHUBQ7VJEiiH70j57jY/frimM7tm+tvA/T5tOrq5wVKmUlID7i4+kT2Evq9+ct6b9og0mIdptEwvQFxX9mYZPgjffUrJY8vueHUyvpHYs6IrHwWsLK7Lo0PEhBVWXeSbBTW1Bpej1eeinow3vi1E0zbBD0i/G3dGK0SmGvnrfOXLO6lPqvuTmbaYC0ytuI8wRkymDZJHmQCkWv/fnByhdFh+APZA67DcMaANwDVMadb5fcR3DfQrBynH8wlkeiVvS1hTVrUehXDUMXXmbmVzz6Gl/ajyboRK6KeV4cw4OJ/L2O+7RtmdT7Cw+U1JxTf4fHs7IwBw03/6lyzGN2QM6b9dXX3QDMwivWpLvbtEvoc0uV/jrakRpgk8lfnEG0jx6dX/MCBmOmMoXGHGycDKCU0QXdr3aQ4X+Zzw9kXPBNCrcRNolcnohgogkcg3+tKuLPfmzOi+1DCy3F6OP8+oy1d3QcqfELDDCdBLmF4V2QjbZkHvMk/i5ZxLguIWeCghgJjhvycVzKGdxHaPZ4FdV85M6PO9TJHt78C5OBreIVKhE/s0HjuWe+2SuPNPoq5p8I0ByEnp9psrD9QwkeKgNRw0/5xirsvlHMS9Ev7Sr+gZi0BKdi5d0NxyjM3xW4xK3";
         String AppId = "ericlee-test-SBX-245f64428-f8523264";
         String DevId = "94fafbb1-985b-465b-84a0-5ec26bc5e9aa";
         String CertId = "SBX-45f64428cfe8-81a7-4bb0-8eb7-c13a";
-
 
 
         String sandBoxUrl = "https://api.sandbox.ebay.com/ws/api.dll";
@@ -91,7 +91,7 @@ public class ebay {
         xstream.useAttributeFor(EbayRequest.class, "xmlns");
         xstream.registerConverter(new Converter());
 
-        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+xstream.toXML(ebay);
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xstream.toXML(ebay);
 
         // Send post request
         con.setDoOutput(true);
@@ -102,7 +102,7 @@ public class ebay {
 
         int responseCode = con.getResponseCode();
 
-        if(responseCode == 200){
+        if (responseCode == 200) {
             BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
             String inputLine;
             StringBuffer response = new StringBuffer();
@@ -117,37 +117,37 @@ public class ebay {
             System.out.println(result);
 
             try {
-                try {
-                    JSONObject xmlJsonObj = XML.toJSONObject(result);
+                JSONObject xmlJsonObj = XML.toJSONObject(result);
 
-                    Map<String, Object> json = xmlJsonObj.toMap();
+                Map<String, Object> json = xmlJsonObj.toMap();
 
-                    Map<String, Object> getOrdersResponse =
-                            (Map<String, Object>) json.get("GetOrdersResponse");
+                Map<String, Object> getOrdersResponse =
+                        (Map<String, Object>) json.get("GetOrdersResponse");
 
-                    Map<String, Object> orderArray =
-                            (Map<String, Object>) getOrdersResponse.get("OrderArray");
+                Map<String, Object> orderArray =
+                        (Map<String, Object>) getOrdersResponse.get("OrderArray");
 
-                    List<Map<String, Object>> orders = (List<Map<String, Object>>) orderArray.get("Order");
-                    for (Map<String, Object> order : orders){
-                        Map<String, Object> extTrans = (Map<String, Object>) order.get("ExternalTransaction");
-                        StringBuilder stringBuilder = new StringBuilder();
-                        stringBuilder.append(order.get("OrderID"));
-                        stringBuilder.append("-");
-                        stringBuilder.append(extTrans.get("ExternalTransactionID"));
-                        order.put("_id", stringBuilder.toString());
-                        mongoOperations.save(order,"eBay");
+                List<Map<String, Object>> orders = (List<Map<String, Object>>) orderArray.get("Order");
+                for (Map<String, Object> order : orders) {
+                    Map<String, Object> extTrans = (Map<String, Object>) order.get("ExternalTransaction");
+                    order.put("type", "API");
+                    order.put("mbr_no", mbrNo);
+                    order.put("mbr_sto_no", mbrSto);
 
-                        //vo += order.toString()+"\n\n\n\n";
-                    }
+                    StringBuilder stringBuilder = new StringBuilder();
+                    stringBuilder.append(order.get("OrderID"));
+                    stringBuilder.append("-");
+                    stringBuilder.append(extTrans.get("ExternalTransactionID"));
+                    order.put("_id", stringBuilder.toString());
+                    mongoOperations.save(order, "eBay_api");
 
-                }catch (Exception e){
-                    e.printStackTrace();
+                    //vo += order.toString()+"\n\n\n\n";
                 }
 
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
+
         }
     }
 }
