@@ -100,7 +100,7 @@ public class EbayCntlr {
     @RequestMapping(value = "/order/ebay/excel")
     public Map<String, Object> saveEbayCSV(@RequestBody Map<String, Object> postObject){
 
-        log.info("request Obj ::::"+postObject);
+        log.info("request Obj ::::"+postObject.toString());
         resobj = new RespObj();
         ObjectMapper om = new ObjectMapper();
         String mbr_no = om.convertValue(postObject.get("mbrNo"), String.class);

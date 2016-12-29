@@ -132,7 +132,7 @@ public class ThrdRun implements Runnable {
                         order.put("_id", stringBuilder.toString());
                         mongoOperations.save(order, "eBay_api");
                         try {
-                            Thread.sleep(100);
+                            Thread.sleep(10000);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
