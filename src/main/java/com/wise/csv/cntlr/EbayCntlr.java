@@ -34,7 +34,7 @@ import org.slf4j.Logger;
  * Author : wisecommerce@bluewisesoft.com
  * Description : write class description here
  */
-@Controller
+@RestController
 public class EbayCntlr {
 
     public Logger log = LoggerFactory.getLogger(EbayCntlr.class);
@@ -45,23 +45,80 @@ public class EbayCntlr {
 
     public MongoOperations mongoOperations = new MongoTemplate(new Mongo(), "db_order");
 
-    @RequestMapping(value = "/order/ebay/excel")
-    public Map<String, Object> saveEbayCSV(
-            @RequestParam List<Ebay> ebays,
-            @RequestParam String mbr_no,
-            @RequestParam String mbr_sto_no,
-            ServletServerHttpRequest request){
-
-        log.info("request::::"+request);
+    /*@RequestMapping(value = "/cbt/mbr/add", method = RequestMethod.POST)
+    @ResponseBody
+    public Map addMember(@RequestBody Map<String, Object> reqmap) {
         resobj = new RespObj();
+        logger.debug("requestBody reqmap = "+reqmap);
+        ObjectMapper om = new ObjectMapper();
+        try {
+            if (!reqmap.isEmpty()){
+               *//*MemberInfo member = om.readValue((String)reqmap.get("member"), MemberInfo.class);*//*
+               *//*MemberInfo member = (MemberInfo) reqmap.get("member");*//*
+
+                MemberInfo member = om.convertValue(reqmap.get("member"), MemberInfo.class);
+
+                String pwd = member.getPwd();
+                String encPwd = SeedUtil.getSeedEncrypt(pwd);
+                member.setPwd(encPwd);
+                member.setRegistrantDtm(DateUtil.getTimestamp());
+                member.setMbrDelYn('N');
+                long mbrNo = mbrSvc.mbrCreate(member);
+                logger.debug("member.toString() :: "+member.toString());
+                logger.debug("mbrNo :::::::::::::: "+mbrNo);
+
+               *//*ArrayList<String> mbrList = (ArrayList<String>) reqmap.get("terms");
+
+               for (String getTerm : mbrList) {
+                   MemberTermsInfo term = om.readValue( getTerm , MemberTermsInfo.class);
+                   logger.debug("term ::::::::::::::: " + term);
+                   term.setMbr_no(mbrNo);
+                   term.setTerm_agree_dtm(DateUtil.getTimestamp());
+                   mbrSvc.mbrTermsCreate(term);
+               }*//*
+
+                ObjectMapper mapper = new ObjectMapper();
+                List<MemberTermsInfo> memberTermsInfos = mapper.convertValue(reqmap.get("terms"),
+                        new TypeReference<List<MemberTermsInfo>>() { });
+                for (MemberTermsInfo memberTermsInfo : memberTermsInfos){
+                    memberTermsInfo.setMbr_no(mbrNo);
+                    memberTermsInfo.setTerm_agree_dtm(DateUtil.getTimestamp());
+                    mbrSvc.mbrTermsCreate(memberTermsInfo);
+                }
+
+                resobj.Success();
+
+            }else {
+                resobj.Error("error","에러메세지");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return resobj.getRespMap();
+    }*/
+
+    @RequestMapping(value = "/order/ebay/excel")
+    public Map<String, Object> saveEbayCSV(@RequestBody Map<String, Object> postObject){
+
+        log.info("request Obj ::::"+postObject);
+        resobj = new RespObj();
+        ObjectMapper om = new ObjectMapper();
+        String mbr_no = om.convertValue(postObject.get("mbrNo"), String.class);
+        String mbr_sto_no = om.convertValue(postObject.get("mbrStorNo"), String.class);
+        List<Ebay> ebays = om.convertValue(postObject.get("ebays"),
+                new TypeReference<List<Ebay>>() { });
+        log.info("mbr_no ::::"+mbr_no+" :::: mbr_sto_no :::: "+mbr_sto_no+" :::: ebays.size :::: "+ebays.size());
 
         Map<String, Object> rtn = this.createEbay(ebays, mbr_no, mbr_sto_no);
         if (rtn!=null){
             resobj.Success(rtn);
+            log.info("Success");
         }else {
             resobj.Error();
+            log.info("Error");
         }
-        
+
+        log.info("rtn :::: "+rtn);
         return resobj.getRespMap();
     }
 
