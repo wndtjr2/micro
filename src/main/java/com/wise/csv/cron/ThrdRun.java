@@ -45,7 +45,7 @@ public class ThrdRun implements Runnable {
 
     @Override
     public void run() {
-
+        System.out.println(this.name + " is running");
         //TODO 스토어테이블에 엮인 API테이블을 불러오는 작업 필요
         //TODO 데이터 불러와서 하단의 키들에 저장
         String token = "AgAAAA**AQAAAA**aAAAAA**madgWA**nY+sHZ2PrBmdj6wVnY+sEZ2PrA2dj6wFk4GiCZSGogmdj6x9nY+seQ**7gUEAA**AAMAAA**KeRo8h5GEHLuGXnBmIGJDxMr3vH3tyftNTAFPdleYmSPWJhtFyVSQ2vvX8uUGXtkR40QwXuIZTAc9BMrN4mYR4kkVnKTrlqSqRFvN228s9lteZNAhDtDTzBCbwVhoDLnHUBQ7VJEiiH70j57jY/frimM7tm+tvA/T5tOrq5wVKmUlID7i4+kT2Evq9+ct6b9og0mIdptEwvQFxX9mYZPgjffUrJY8vueHUyvpHYs6IrHwWsLK7Lo0PEhBVWXeSbBTW1Bpej1eeinow3vi1E0zbBD0i/G3dGK0SmGvnrfOXLO6lPqvuTmbaYC0ytuI8wRkymDZJHmQCkWv/fnByhdFh+APZA67DcMaANwDVMadb5fcR3DfQrBynH8wlkeiVvS1hTVrUehXDUMXXmbmVzz6Gl/ajyboRK6KeV4cw4OJ/L2O+7RtmdT7Cw+U1JxTf4fHs7IwBw03/6lyzGN2QM6b9dXX3QDMwivWpLvbtEvoc0uV/jrakRpgk8lfnEG0jx6dX/MCBmOmMoXGHGycDKCU0QXdr3aQ4X+Zzw9kXPBNCrcRNolcnohgogkcg3+tKuLPfmzOi+1DCy3F6OP8+oy1d3QcqfELDDCdBLmF4V2QjbZkHvMk/i5ZxLguIWeCghgJjhvycVzKGdxHaPZ4FdV85M6PO9TJHt78C5OBreIVKhE/s0HjuWe+2SuPNPoq5p8I0ByEnp9psrD9QwkeKgNRw0/5xirsvlHMS9Ev7Sr+gZi0BKdi5d0NxyjM3xW4xK3";
@@ -105,7 +105,7 @@ public class ThrdRun implements Runnable {
 
                 //print result
                 String result = response.toString();
-                System.out.println(result);
+                //System.out.println(result);
 
                 try {
                     org.json.JSONObject xmlJsonObj = XML.toJSONObject(result);
@@ -132,7 +132,7 @@ public class ThrdRun implements Runnable {
                         order.put("_id", stringBuilder.toString());
                         mongoOperations.save(order, "eBay_api");
                         try {
-                            Thread.sleep(10000);
+                            Thread.sleep(500);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }

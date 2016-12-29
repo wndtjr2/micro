@@ -27,7 +27,7 @@ public class ebay {
 
     private static Environment environment;
 
-    @Scheduled(cron = "*/5 * * * * *")
+    @Scheduled(cron = "*/30 * * * * *")
     public void apiRequest() throws Exception {
 
         //Ready to use ThreadPool
@@ -36,9 +36,9 @@ public class ebay {
 
         //TODO 스토어 테이블 불러오는 작업
 
-        int cnt = 0;
         //TODO for문 수정 필요
-        for(int i = 0; i < 100; i++){//임시 for 문
+        int cnt = 0;
+        for(int i = 0; i < 20; i++){//임시 for 문
             String mbrNo = "1019";
             String mbrSto = "123123";
 
@@ -47,13 +47,21 @@ public class ebay {
             run.setMbrNo(mbrNo);
             run.setMbrSto(mbrSto);
             taskExecutor.execute(run);
+        }
 
+        //액티브 쓰레드 확인작업후 쓰레드 없으며 셧다운
+        for (;;) {
+            int count = taskExecutor.getActiveCount();
+            System.out.println("Active Threads : " + count);
             try {
-                Thread.sleep(100);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            if (count == 0) {
+                taskExecutor.shutdown();
+                break;
+            }
         }
-
     }
 }
